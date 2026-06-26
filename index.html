@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mini Emotion Cipher</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,72,400;0,72,500;0,72,600;1,72,400&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink: #14161c;
+    --ink-soft: #1d212b;
+    --parchment: #f4efe4;
+    --parchment-dim: #cfc9ba;
+    --wax: #b5402f;
+    --wax-bright: #e25c43;
+    --line: rgba(244,239,228,0.12);
+    --joy: #e0a83c;
+    --sadness: #5b7fa6;
+    --anger: #b5402f;
+    --fear: #6b5b95;
+    --excitement: #d8794a;
+    --neutral: #8a8474;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--ink);
+    color:var(--parchment);
+    font-family:'Inter', sans-serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:48px 20px 80px;
+  }
+  .wrap{ max-width:760px; width:100%; }
+
+  header{ margin-bottom:48px; text-align:left; }
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--wax-bright);
+    margin-bottom:14px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .eyebrow .dot{ width:6px; height:6px; border-radius:50%; background:var(--wax-bright); }
+  h1{
+    font-family:'Newsreader', serif;
+    font-weight:500;
+    font-size:42px;
+    line-height:1.1;
+    margin:0 0 14px;
+    letter-spacing:-0.01em;
+  }
+  h1 em{ font-style:italic; color:var(--wax-bright); font-weight:400; }
+  .lede{
+    font-size:16px;
+    line-height:1.6;
+    color:var(--parchment-dim);
+    max-width:560px;
+  }
+
+  .card{
+    background:var(--ink-soft);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:32px;
+    margin-bottom:24px;
+  }
+  label{
+    display:block;
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--parchment-dim);
+    margin-bottom:10px;
+  }
+  textarea{
+    width:100%;
+    min-height:110px;
+    background:transparent;
+    border:1px solid var(--line);
+    border-radius:8px;
+    color:var(--parchment);
+    font-family:'Newsreader', serif;
+    font-size:18px;
+    line-height:1.5;
+    padding:16px;
+    resize:vertical;
+  }
+  textarea:focus{ outline:none; border-color:var(--wax-bright); }
+  textarea::placeholder{ color:var(--parchment-dim); opacity:0.6; }
+
+  .row{ display:flex; gap:12px; margin-top:18px; flex-wrap:wrap; }
+  button{
+    font-family:'JetBrains Mono', monospace;
+    font-size:13px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    border:none;
+    border-radius:8px;
+    padding:13px 22px;
+    cursor:pointer;
+    transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+  }
+  button:active{ transform:scale(0.97); }
+  button:disabled{ opacity:0.35; cursor:not-allowed; }
+  .btn-primary{
+    background:var(--wax);
+    color:var(--parchment);
+  }
+  .btn-primary:hover:not(:disabled){ background:var(--wax-bright); }
+  .btn-ghost{
+    background:transparent;
+    color:var(--parchment);
+    border:1px solid var(--line);
+  }
+  .btn-ghost:hover:not(:disabled){ border-color:var(--wax-bright); color:var(--wax-bright); }
+
+  .key-strip{
+    margin-top:18px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    color:var(--parchment-dim);
+    flex-wrap:wrap;
+  }
+  .key-pill{
+    background:rgba(0,0,0,0.25);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:6px 10px;
+    color:var(--joy);
+    word-break:break-all;
+  }
+
+  .result{ margin-top:8px; display:none; }
+  .result.show{ display:block; }
+  .result-row{ margin-top:22px; }
+  .result-label{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--parchment-dim);
+    margin-bottom:8px;
+  }
+  .cipher-block{
+    font-family:'JetBrains Mono', monospace;
+    font-size:14px;
+    line-height:1.6;
+    background:rgba(0,0,0,0.3);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:14px 16px;
+    word-break:break-all;
+    color:var(--parchment-dim);
+  }
+  .plain-block{
+    font-family:'Newsreader', serif;
+    font-size:18px;
+    line-height:1.5;
+    background:rgba(255,255,255,0.03);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:14px 16px;
+  }
+
+  .tags{ display:flex; gap:8px; flex-wrap:wrap; }
+  .tag{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.04em;
+    padding:7px 13px;
+    border-radius:20px;
+    display:flex;
+    align-items:center;
+    gap:7px;
+    border:1px solid var(--line);
+  }
+  .tag .swatch{ width:8px; height:8px; border-radius:50%; }
+
+  .seal{
+    width:46px; height:46px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, var(--wax-bright), var(--wax) 70%);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Newsreader', serif; font-style:italic; font-size:20px;
+    flex-shrink:0;
+    box-shadow:0 0 0 3px rgba(181,64,47,0.15);
+  }
+
+  .meta-row{ display:flex; align-items:center; gap:14px; margin-bottom:18px; }
+  .meta-row .meta-text{ font-size:14px; color:var(--parchment-dim); line-height:1.5; }
+  .meta-text b{ color:var(--parchment); }
+
+  footer{
+    margin-top:40px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    color:var(--parchment-dim);
+    text-align:center;
+    line-height:1.8;
+  }
+  a{ color:var(--wax-bright); text-decoration:none; }
+  a:hover{ text-decoration:underline; }
+
+  .divider{ height:1px; background:var(--line); margin:26px 0; }
+
+  @media (max-width:560px){
+    h1{ font-size:32px; }
+    .card{ padding:22px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+<h1>Words stay private.<br><em>Feelings stay readable.</em></h1>
+    <p class="lede">Mini Emotion Cipher reads the emotion in your message, then seals the words themselves behind real AES-256 encryption — so the feeling can be seen without the sentence ever being exposed.</p>
+  </header>
+
+  <div class="card">
+    <label for="input">Your message</label>
+    <textarea id="input" placeholder="Type something honest. e.g. Finally got the job offer! I'm thrilled and can't wait to start."></textarea>
+    <div class="row">
+      <button class="btn-primary" id="encryptBtn">Encrypt &amp; Detect Emotion</button>
+      <button class="btn-ghost" id="clearBtn">Clear</button>
+    </div>
+  </div>
+
+  <div class="card result" id="resultCard">
+    <div class="meta-row">
+      <div class="seal">✒</div>
+      <div class="meta-text">The message below is <b>sealed</b> — its words are encrypted, but its <b>emotional signature</b> survived intact.</div>
+    </div>
+
+    <div class="result-row">
+      <div class="result-label">Detected emotion</div>
+      <div class="tags" id="emotionTags"></div>
+    </div>
+
+    <div class="result-row">
+      <div class="result-label">Encrypted text (AES-256-GCM)</div>
+      <div class="cipher-block" id="cipherOutput"></div>
+    </div>
+
+    <div class="key-strip">
+      <span>Encryption key (generated for this message):</span>
+      <span class="key-pill" id="keyDisplay"></span>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="row">
+      <button class="btn-primary" id="decryptBtn">Decrypt with this key</button>
+    </div>
+
+    <div class="result-row" id="decryptedSection" style="display:none;">
+      <div class="result-label">Decrypted — original message</div>
+      <div class="plain-block" id="decryptedOutput"></div>
+      <div class="result-row">
+        <div class="result-label">Detected emotion (re-confirmed)</div>
+        <div class="tags" id="emotionTagsAfter"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Encryption runs entirely in your browser via the native Web Crypto API.<br>
+    No server, no API key, no data ever leaves this page.
+  </footer>
+</div>
+
+<script src="emotion.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

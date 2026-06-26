@@ -1,0 +1,9 @@
+{
+  "name": "mini-emotion-cipher",
+  "version": "1.0.0",
+  "description": "Emotion-aware AES-256-GCM text encryption demo for the UnsaidTalks hackathon.",
+  "private": true,
+  "scripts": {
+    "start": "npx serve ."
+  }
+}
